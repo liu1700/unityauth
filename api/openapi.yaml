@@ -1,0 +1,1938 @@
+openapi: 3.0.0
+info:
+  description: |
+    # Introduction
+    This is the API specification for the Unity Authentication service that allows player authentication.
+
+    ## Rate Limits
+    The API has rate limiting in place. The endpoints are limited to 15 requests per second on a per-IP basis, and 300 requests over 30 minutes.
+    The API responds with a `429` HTTP status code if the rate limit is exceeded.
+    It will also respond with a `Retry-After` header to be used in conjunction with a client's retry logic. The value is the number of seconds until a request for the given player will be accepted.
+  title: Player Authentication API
+  version: 1.0.1
+servers:
+- url: https://player-auth.services.api.unity.com
+tags:
+- description: "For more information about Unity Authentication and how to use these\
+    \ APIs, please read the [Client Authentication Documentation](https://services.docs.unity.com/docs/client-auth).\
+    \ It includes information about available authentication options, login states,\
+    \ and enforcing login state for the end player."
+  name: Player Authentication
+paths:
+  /v1/authentication/anonymous:
+    post:
+      description: Sign-up a new anonymous player.
+      operationId: SignUpAnonymously
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Environment you want to authorize a player to access. It is the name of the Environment. If this header is not specified, then the default Environment is used. An invalid environment name is not an acceptable input.
+        example: production
+        explode: false
+        in: header
+        name: UnityEnvironment
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpAnonymouslyRequest'
+        description: Anonymous Sign Up request body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      summary: Anonymous Sign Up
+      tags:
+      - Player Authentication
+  /v1/authentication/external-token/{idProvider}:
+    post:
+      description: "Authenticate players using external token. The external tokens\
+        \ are from login providers, such as Facebook."
+      operationId: SignInWithExternalToken
+      parameters:
+      - description: |
+          This is the id provider type.
+        example: identity-provider-name
+        explode: false
+        in: path
+        name: idProvider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Environment you want to authorize a player to access. It is the name of the Environment. If this header is not specified, then the default Environment is used. An invalid environment name is not an acceptable input.
+        example: production
+        explode: false
+        in: header
+        name: UnityEnvironment
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInWithExternalTokenRequest'
+        description: External Token Authentication request body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      summary: External Token Sign In
+      tags:
+      - Player Authentication
+  /v1/authentication/session-token:
+    post:
+      description: Authenticate players using the session token. Store the session
+        token in a persistent storage in the app or on device.
+      operationId: SignInWithSessionToken
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Environment you want to authorize a player to access. It is the name of the Environment. If this header is not specified, then the default Environment is used. An invalid environment name is not an acceptable input.
+        example: production
+        explode: false
+        in: header
+        name: UnityEnvironment
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInWithSessionTokenRequest'
+        description: Session Token Authentication request body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      summary: Session Token Sign In
+      tags:
+      - Player Authentication
+  /v1/authentication/link/{idProvider}:
+    post:
+      description: Link an External Id to a Unity Authentication account
+      operationId: LinkExternalId
+      parameters:
+      - description: |
+          This is the id provider type.
+        example: identity-provider-name
+        explode: false
+        in: path
+        name: idProvider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkExternalIdRequest'
+        description: Link External Id request body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkExternalIdResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      security:
+      - Client: []
+      summary: Link External Id
+      tags:
+      - Player Authentication
+  /v1/authentication/unlink/{idProvider}:
+    post:
+      description: Unlink an external account from a Unity Authentication account.
+      operationId: UnlinkExternalId
+      parameters:
+      - description: |
+          This is the id provider type.
+        example: identity-provider-name
+        explode: false
+        in: path
+        name: idProvider
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UnlinkExternalIdRequest'
+        description: Unlink external Id request body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnlinkExternalIdResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      security:
+      - Client: []
+      summary: Unlink External Id
+      tags:
+      - Player Authentication
+  /v1/authentication/usernamepassword/sign-up:
+    post:
+      description: Create a new player for the Username Password IdProvider. Store
+        the session token in a persistent storage in the app or on device.
+      operationId: SignUpWithUsernamePassword
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: "This is the bearer token for the user authorized to call this\
+          \ API. When this is provided, a user associated with the bearer token will\
+          \ be used instead of creating a new user."
+        example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        explode: false
+        in: header
+        name: BearerAuth
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsernamePasswordRequest'
+        description: The Username and Password of the player.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      security:
+      - Client: []
+      summary: Username Password Sign Up
+      tags:
+      - Player Authentication
+  /v1/authentication/usernamepassword/sign-in:
+    post:
+      description: Sign in using the Username Password IdProvider. Store the session
+        token in a persistent storage in the app or on device.
+      operationId: SignInWithUsernamePassword
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsernamePasswordRequest'
+        description: The Username and Password of the player.
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      security:
+      - Client: []
+      summary: Username Password Sign In
+      tags:
+      - Player Authentication
+  /v1/authentication/usernamepassword/update-password:
+    post:
+      description: Update the password of a player using the Username Password IdProvider.
+        Store the session token in a persistent storage in the app or on device.
+      operationId: UsernamePasswordUpdatePassword
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the bearer token for the user authorized to call this API.
+        example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        explode: false
+        in: header
+        name: BearerAuth
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UsernamePasswordPasswordUpdateRequest'
+        description: "The Username, current Password and new Password of the player."
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      security:
+      - Client: []
+      summary: Username Password Update Password
+      tags:
+      - Player Authentication
+  /v1/authentication/code-link/generate:
+    post:
+      description: Generates a sign in code for an unauthenticated device.
+      operationId: GenerateCode
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Environment you want to authorize a player to access. It is the name of the Environment. If this header is not specified, then the default Environment is used. An invalid environment name is not an acceptable input.
+        example: production
+        explode: false
+        in: header
+        name: UnityEnvironment
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateCodeRequest'
+        description: Generate Code Request Body
+        required: false
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateCodeResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      summary: Generate Code
+      tags:
+      - Player Authentication
+  /v1/authentication/code-link/sign-in/{CodeLinkSessionId}:
+    post:
+      description: "Tries to sign in a user with code. In the case this returns 200\
+        \ and an empty response, poll at regular intervals, 2-5s to avoid being rate\
+        \ limited, until you receive a different response."
+      operationId: SignInWithCode
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Environment you want to authorize a player to access. It is the name of the Environment. If this header is not specified, then the default Environment is used. An invalid environment name is not an acceptable input.
+        example: production
+        explode: false
+        in: header
+        name: UnityEnvironment
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: An identifier for the device requesting the code sign in.
+        explode: false
+        in: path
+        name: CodeLinkSessionId
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignInWithCodeRequest'
+        description: Code Link Request for Sign In
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      summary: Sign In With Code
+      tags:
+      - Player Authentication
+  /v1/authentication/code-link/info:
+    post:
+      description: Get code information including the identifier and expiration.
+      operationId: GetCodeInfo
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Environment you want to authorize a player to access. It is the name of the Environment. If this header is not specified, then the default Environment is used. An invalid environment name is not an acceptable input.
+        example: production
+        explode: false
+        in: header
+        name: UnityEnvironment
+        required: false
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeLinkInfoRequest'
+        description: Code Link Request for Sign In
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeLinkInfoResponse'
+          description: A successful response.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      summary: Get Code Info
+      tags:
+      - Player Authentication
+  /v1/authentication/code-link/confirm:
+    post:
+      description: Allow a user to sign in to this account using this code
+      operationId: CodeConfirmation
+      parameters:
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Environment you want to authorize a player to access. It is the name of the Environment. If this header is not specified, then the default Environment is used. An invalid environment name is not an acceptable input.
+        example: production
+        explode: false
+        in: header
+        name: UnityEnvironment
+        required: false
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the bearer token for the user authorized to call this API.
+        example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        explode: false
+        in: header
+        name: BearerAuth
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodeLinkConfirmationRequest'
+        description: Code confirmation request.
+        required: false
+      responses:
+        "200":
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      summary: Code Confirmation
+      tags:
+      - Player Authentication
+  /v1/users/{PlayerId}:
+    delete:
+      description: Delete the player.
+      operationId: DeletePlayer
+      parameters:
+      - description: |
+          This is the player id.
+        example: 99i9ju8juh
+        explode: false
+        in: path
+        name: PlayerId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      security:
+      - Client: []
+      summary: Delete Player
+      tags:
+      - Player Authentication
+    get:
+      description: Get the information for a player.
+      operationId: GetPlayer
+      parameters:
+      - description: |
+          This is the player id.
+        example: 99i9ju8juh
+        explode: false
+        in: path
+        name: PlayerId
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: |
+          This is the Unity Project Id. It is a uuid format.
+        example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+        explode: false
+        in: header
+        name: ProjectId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayerResponse'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "401":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Unauthorized.
+        "403":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Permission Denied.
+        "404":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Resource not found.
+        "429":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Too Many Requests.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+        "503":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Service Unavailable.
+      security:
+      - Client: []
+      summary: Get Player
+      tags:
+      - Player Authentication
+  /.well-known/jwks.json:
+    get:
+      description: Get the JSON Web Key Set for validating authentication tokens.
+      operationId: GetJSONWebKeySet
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JSONWebKeySet'
+          description: A successful response.
+        "400":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Bad Request.
+        "500":
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationError'
+          description: Internal Server Error.
+      summary: Get JWKS
+      tags:
+      - Player Authentication
+components:
+  parameters:
+    UnityEnvironment:
+      description: |
+        This is the Environment you want to authorize a player to access. It is the name of the Environment. If this header is not specified, then the default Environment is used. An invalid environment name is not an acceptable input.
+      example: production
+      explode: false
+      in: header
+      name: UnityEnvironment
+      required: false
+      schema:
+        type: string
+      style: simple
+    ProjectId:
+      description: |
+        This is the Unity Project Id. It is a uuid format.
+      example: 8bdacc33-6eef-4577-beb0-633c86259f5b
+      explode: false
+      in: header
+      name: ProjectId
+      required: true
+      schema:
+        type: string
+      style: simple
+    BearerAuth:
+      description: |
+        This is the bearer token for the user authorized to call this API.
+      example: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+      explode: false
+      in: header
+      name: BearerAuth
+      required: true
+      schema:
+        type: string
+      style: simple
+    idProvider:
+      description: |
+        This is the id provider type.
+      example: identity-provider-name
+      explode: false
+      in: path
+      name: idProvider
+      required: true
+      schema:
+        type: string
+      style: simple
+    PlayerId:
+      description: |
+        This is the player id.
+      example: 99i9ju8juh
+      explode: false
+      in: path
+      name: PlayerId
+      required: true
+      schema:
+        type: string
+      style: simple
+    CodeLinkSessionId:
+      description: An identifier for the device requesting the code sign in.
+      explode: false
+      in: path
+      name: CodeLinkSessionId
+      required: false
+      schema:
+        type: string
+      style: simple
+  schemas:
+    SignUpAnonymouslyRequest:
+      description: the request body for anonymous signup
+      example:
+        nonce: 9i09urd6ffg
+      properties:
+        nonce:
+          description: "String value used to associate a client session with an Id\
+            \ Token, and to mitigate replay attacks. If this field is provided, the\
+            \ nonce claim in response id token has a matching value."
+          example: 9i09urd6ffg
+          type: string
+      title: SignUpAnonymouslyRequest
+      type: object
+    AuthenticationResponse:
+      description: Response for an authentication request.
+      example:
+        expiresIn: 3600
+        idToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        sessionToken: 5eb26a338a232
+        user:
+          externalIds:
+          - providerId: provider-id
+            externalId: 5eb26a338a232
+          - providerId: provider-id
+            externalId: 5eb26a338a232
+          disabled: false
+          id: eyJhbGciOiJIUzI1
+          username: New_User_57
+        userId: 5eb26a338a232
+      properties:
+        expiresIn:
+          description: The number of seconds in which the Id token expires. By default
+            it's 3600.
+          example: 3600
+          format: int32
+          type: integer
+        idToken:
+          description: The Id token of the authenticated player.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          type: string
+        sessionToken:
+          description: The session token of the authenticated player. This token can
+            be used to sign-in the player again.
+          example: 5eb26a338a232
+          type: string
+        user:
+          $ref: '#/components/schemas/Player'
+        userId:
+          description: "The Id of the authenticated player. If a project is specified\
+            \ in the request, this field represents the Id of the project scoped player."
+          example: 5eb26a338a232
+          type: string
+      title: AuthenticationResponse
+      type: object
+    LinkExternalIdResponse:
+      description: response for a link request
+      example:
+        expiresIn: 3600
+        idToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        sessionToken: 5eb26a338a232
+        user:
+          externalIds:
+          - providerId: provider-id
+            externalId: 5eb26a338a232
+          - providerId: provider-id
+            externalId: 5eb26a338a232
+          disabled: false
+          id: eyJhbGciOiJIUzI1
+          username: New_User_57
+        userId: 5eb26a338a232
+      properties:
+        expiresIn:
+          description: The number of seconds in which the Id token expires. By default
+            it's 3600.
+          example: 3600
+          format: int32
+          type: integer
+        idToken:
+          description: The Id token of the authenticated player.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          type: string
+        sessionToken:
+          description: The session token of the authenticated player. This token can
+            be used to sign-in the player again.
+          example: 5eb26a338a232
+          type: string
+        user:
+          $ref: '#/components/schemas/Player'
+        userId:
+          description: "The Id of the authenticated player. If a project is specified\
+            \ in the request, this field represents the Id of the project scoped player."
+          example: 5eb26a338a232
+          type: string
+      title: LinkExternalIdResponse
+      type: object
+    UnlinkExternalIdResponse:
+      description: Response for an unlink request.
+      example:
+        expiresIn: 3600
+        idToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+        sessionToken: 5eb26a338a232
+        user:
+          externalIds:
+          - providerId: provider-id
+            externalId: 5eb26a338a232
+          - providerId: provider-id
+            externalId: 5eb26a338a232
+          disabled: false
+          id: eyJhbGciOiJIUzI1
+          username: New_User_57
+        userId: 5eb26a338a232
+      properties:
+        expiresIn:
+          description: The number of seconds in which the Id token expires. By default
+            it's 3600.
+          example: 3600
+          format: int32
+          type: integer
+        idToken:
+          description: The Id token of the authenticated player.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+          type: string
+        sessionToken:
+          description: The session token of the authenticated player. This token can
+            be used to sign-in the player again.
+          example: 5eb26a338a232
+          type: string
+        user:
+          $ref: '#/components/schemas/Player'
+        userId:
+          description: "The Id of the authenticated player. If a project is specified\
+            \ in the request, this field represents the Id of the project scoped player."
+          example: 5eb26a338a232
+          type: string
+      title: UnlinkExternalIdResponse
+      type: object
+    ExternalId:
+      description: Represents a Player provided by an External Provider.
+      example:
+        providerId: provider-id
+        externalId: 5eb26a338a232
+      properties:
+        externalId:
+          description: The Id of the player from the external provider.
+          example: 5eb26a338a232
+          type: string
+        providerId:
+          description: The provider Id within the Id domain that provided the link.
+          example: provider-id
+          type: string
+      title: ExternalId
+      type: object
+    SignInWithExternalTokenRequest:
+      description: the request body for external token authentication
+      example:
+        appleGameCenterConfig:
+          salt: ascfr==
+          teamPlayerId: 5eb26a338a232
+          publicKeyUrl: something.com/path.cert
+          timestamp: 389743847
+        steamConfig:
+          identity: identity
+        signInOnly: false
+        oculusConfig:
+          userId: 5eb26a338a232
+        nonce: 5eb26a338a232
+        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX
+      properties:
+        nonce:
+          description: "String value used to associate a client session with an Id\
+            \ token, and to mitigate replay attacks. If this field is provided, the\
+            \ nonce claim in response Id token will have a matching value."
+          example: 5eb26a338a232
+          type: string
+        signInOnly:
+          description: Whether the API should only attempt to sign-in and do not create
+            a new player if the player does not exist.
+          example: false
+          type: boolean
+        token:
+          description: External token that can be verified to represent a player from
+            the id provider. This may be an id token or an access token.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX
+          type: string
+        oculusConfig:
+          $ref: '#/components/schemas/OculusConfig'
+        appleGameCenterConfig:
+          $ref: '#/components/schemas/AppleGameCenterConfig'
+        steamConfig:
+          $ref: '#/components/schemas/SteamConfig'
+      title: SignInWithExternalTokenRequest
+      type: object
+    OculusConfig:
+      description: The request body for Oculus authentication. This field is not applicable
+        for any other Id provider.
+      example:
+        userId: 5eb26a338a232
+      properties:
+        userId:
+          description: String value of the oculus player's Id.
+          example: 5eb26a338a232
+          type: string
+      title: OculusConfig
+      type: object
+    AppleGameCenterConfig:
+      description: The request body for Apple Game Center authentication. This field
+        is not applicable for any other Id provider.
+      example:
+        salt: ascfr==
+        teamPlayerId: 5eb26a338a232
+        publicKeyUrl: something.com/path.cert
+        timestamp: 389743847
+      properties:
+        teamPlayerId:
+          description: String value of the Apple Game Center player's team player
+            Id.
+          example: 5eb26a338a232
+          type: string
+        timestamp:
+          description: Integer value of the timestamp.
+          example: 389743847
+          type: integer
+        publicKeyUrl:
+          description: String value of the Apple Game Center public key url.
+          example: something.com/path.cert
+          type: string
+        salt:
+          description: String value of the base64 encoded salt.
+          example: ascfr==
+          type: string
+      title: AppleGameCenterConfig
+      type: object
+    SteamConfig:
+      description: "Identifying string passed as a parameter to Steam's GetAuthTicketForWebApi\
+        \ when the ticket was created, used to identify the entity calling this webapi.\
+        \ This should not be sent if no identity was passed issue a ticket from steam."
+      example:
+        identity: identity
+      properties:
+        identity:
+          description: If this identity string was passed to GetAuthTicketForWebApi
+            then the same value must be provided as the identity property. This value
+            should be the comprised of alphanumeric characters with a length between
+            5 and 30.
+          maxLength: 30
+          minLength: 5
+          type: string
+      title: SteamConfig
+    JSONWebKey:
+      description: JSON Web Key for validating authentication tokens.
+      example:
+        kty: RSA
+        e: 43urutru
+        use: sig
+        kid: public-0000000-0000-0000-0000-111111111111
+        alg: RS256
+        "n": igu4jtou4389ru34890ut90i34r0-i39w4ru90u
+      properties:
+        alg:
+          example: RS256
+          type: string
+        e:
+          example: 43urutru
+          type: string
+        kid:
+          example: public-0000000-0000-0000-0000-111111111111
+          type: string
+        kty:
+          example: RSA
+          type: string
+        "n":
+          example: igu4jtou4389ru34890ut90i34r0-i39w4ru90u
+          title: RSA public key
+          type: string
+        use:
+          example: sig
+          type: string
+      title: JSONWebKey
+      type: object
+    JSONWebKeySet:
+      description: JSON Web Key Set for validating authentication tokens.
+      example:
+        keys:
+        - kty: RSA
+          e: 43urutru
+          use: sig
+          kid: public-0000000-0000-0000-0000-111111111111
+          alg: RS256
+          "n": igu4jtou4389ru34890ut90i34r0-i39w4ru90u
+        - kty: RSA
+          e: 43urutru
+          use: sig
+          kid: public-0000000-0000-0000-0000-111111111111
+          alg: RS256
+          "n": igu4jtou4389ru34890ut90i34r0-i39w4ru90u
+      properties:
+        keys:
+          items:
+            $ref: '#/components/schemas/JSONWebKey'
+          type: array
+      title: JSONWebKeySet
+      type: object
+    LinkExternalIdRequest:
+      description: the request body for link external id
+      example:
+        appleGameCenterConfig:
+          salt: ascfr==
+          teamPlayerId: 5eb26a338a232
+          publicKeyUrl: something.com/path.cert
+          timestamp: 389743847
+        steamConfig:
+          identity: identity
+        forceLink: false
+        oculusConfig:
+          userId: 5eb26a338a232
+        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX
+      properties:
+        forceLink:
+          description: "Force a link between the player specified in the UAS access\
+            \ token and the external Id. If a different UAS player is already linked\
+            \ to the external id, unlink that player from the external id before linking\
+            \ the request's player."
+          example: false
+          type: boolean
+        token:
+          description: External token that can be verified to represent a player from
+            the Id provider. This may be an Id token or an access token.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX
+          type: string
+        oculusConfig:
+          $ref: '#/components/schemas/OculusConfig'
+        appleGameCenterConfig:
+          $ref: '#/components/schemas/AppleGameCenterConfig'
+        steamConfig:
+          $ref: '#/components/schemas/SteamConfig'
+      title: LinkExternalIdRequest
+      type: object
+    SignInWithSessionTokenRequest:
+      description: the request body for session token authentication
+      example:
+        sessionToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX
+        nonce: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX
+      properties:
+        nonce:
+          description: "String value used to associate a Client session with an Id\
+            \ Token, and to mitigate replay attacks. If this field is provided, the\
+            \ nonce claim in response Id token has a matching value."
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX
+          type: string
+        sessionToken:
+          description: The session token of the player.
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpX
+          type: string
+      title: SignInWithSessionTokenRequest
+      type: object
+    UnlinkExternalIdRequest:
+      description: The request body for unlink external id.
+      example:
+        externalId: eyJhbGciOiJIUzI1Ni
+      properties:
+        externalId:
+          description: The external Id to unlink from the player account.
+          example: eyJhbGciOiJIUzI1Ni
+          type: string
+      title: UnlinkExternalIdRequest
+      type: object
+    GenerateCodeRequest:
+      description: Request for generating a sign in code.
+      example:
+        identifier: myDevice
+        codeChallenge: codeChallenge
+      properties:
+        identifier:
+          description: Human-readable string to identify the requester device.
+          example: myDevice
+          maxLength: 128
+          type: string
+        codeChallenge:
+          description: SHA-256 string challenge for PKCE validation
+          maxLength: 64
+          type: string
+      title: GenerateCodeRequest
+      type: object
+    GenerateCodeResponse:
+      description: Response for code linking with information on the code.
+      example:
+        codeLinkSessionId: codeLinkSessionId
+        signInCode: f4j98K
+        expiration: 0
+      properties:
+        codeLinkSessionId:
+          description: UUID identifying the code linking session.
+          type: string
+        signInCode:
+          description: The code required to perform the code confirmation.
+          example: f4j98K
+          type: string
+        expiration:
+          description: The timestamp for when the code is no longer valid in unix
+            time since epoch.
+          type: integer
+      title: GenerateCodeResponse
+      type: object
+    SignInWithCodeRequest:
+      description: Request for checking if the code was confirmed.
+      example:
+        codeVerifier: codeVerifier
+      properties:
+        codeVerifier:
+          description: Verifier for PKCE validation.
+          maxLength: 128
+          minimum: 43
+          type: string
+      title: SignInWithCodeRequest
+      type: object
+    CodeLinkInfoRequest:
+      description: Request information for a sign in code.
+      example:
+        signInCode: signInCode
+      properties:
+        signInCode:
+          description: The code from which to get the info.
+          type: string
+      title: CodeLinkInfoRequest
+      type: object
+    CodeLinkInfoResponse:
+      description: Information on the requested code
+      example:
+        identifier: myDevice
+        expiration: 0
+      properties:
+        identifier:
+          description: Human-readable string to identify the requester device.
+          example: myDevice
+          type: string
+        expiration:
+          description: The timestamp for when the code is no longer valid in unix
+            time since epoch.
+          type: integer
+      title: CodeLinkCheckConfirmationResponse
+      type: object
+    CodeLinkConfirmationRequest:
+      description: Request for confirming the code linking.
+      example:
+        idProvider: idProvider
+        externalToken: externalToken
+        sessionToken: sessionToken
+        signInCode: f4j98K
+      properties:
+        signInCode:
+          description: The code returned in the GenerateCodeResponse.
+          example: f4j98K
+          type: string
+        sessionToken:
+          description: "The authenticated device session token, for added security."
+          type: string
+        idProvider:
+          description: This is the id provider type. Only for consoles.
+          type: string
+        externalToken:
+          description: External token to validate the user. Only for consoles.
+          type: string
+      title: CodeLinkConfirmationRequest
+      type: object
+    Player:
+      description: Represents the player data.
+      example:
+        externalIds:
+        - providerId: provider-id
+          externalId: 5eb26a338a232
+        - providerId: provider-id
+          externalId: 5eb26a338a232
+        disabled: false
+        id: eyJhbGciOiJIUzI1
+        username: New_User_57
+      properties:
+        disabled:
+          description: Whether the player is disabled by admin.
+          example: false
+          type: boolean
+        externalIds:
+          description: "The list of linked external providers info. The list itself\
+            \ doesn't limit the number of external accounts linked with this player.\
+            \ In our current version, we allow only one external account of each type\
+            \ to link with the player. For example, you can't link two different Facebook\
+            \ Ids with the same player."
+          items:
+            $ref: '#/components/schemas/ExternalId'
+          type: array
+        id:
+          description: The player Id. The Id is unique within the Id domain.
+          example: eyJhbGciOiJIUzI1
+          type: string
+        username:
+          description: The username used to sign in using the Username Password IdProvider.
+          example: New_User_57
+          type: string
+      title: Player
+      type: object
+    PlayerResponse:
+      description: Represents the player data.
+      example:
+        createdAt: "123000000"
+        usernamepassword:
+          createdAt: "123000000"
+          passwordUpdatedAt: "123000000"
+          lastLoginAt: "123000000"
+          username: New_User_57
+        lastLoginAt: "123000000"
+        externalIds:
+        - providerId: provider-id
+          externalId: 5eb26a338a232
+        - providerId: provider-id
+          externalId: 5eb26a338a232
+        disabled: false
+        id: eyJhbGciOiJIUzI1N
+      properties:
+        disabled:
+          description: Whether the player is disabled by admin.
+          example: false
+          type: boolean
+        externalIds:
+          description: This is the response returned when get player is called.
+          items:
+            $ref: '#/components/schemas/ExternalId'
+          type: array
+        id:
+          description: The player Id. The Id is unique within the Id domain.
+          example: eyJhbGciOiJIUzI1N
+          type: string
+        createdAt:
+          description: When the player was created. It is a unix timestamp.
+          example: "123000000"
+          type: string
+        lastLoginAt:
+          description: When the player last logged in. It is a unix timestamp.
+          example: "123000000"
+          type: string
+        usernamepassword:
+          $ref: '#/components/schemas/UsernamePasswordResponse'
+      title: PlayerResponse
+      type: object
+    UsernamePasswordResponse:
+      description: Information about the username/password account.
+      example:
+        createdAt: "123000000"
+        passwordUpdatedAt: "123000000"
+        lastLoginAt: "123000000"
+        username: New_User_57
+      properties:
+        username:
+          description: "The username. Case insensitive. Length must be between 3-20\
+            \ with the allowed characters a-z, 0-9 and the symbols [.][-][@][_]."
+          example: New_User_57
+          type: string
+        createdAt:
+          description: When the username/password account was created. It is a unix
+            timestamp.
+          example: "123000000"
+          type: string
+        lastLoginAt:
+          description: When the username/password account last logged in. It is a
+            unix timestamp.
+          example: "123000000"
+          type: string
+        passwordUpdatedAt:
+          description: When the username/password account password was last updated.
+            It is a unix timestamp.
+          example: "123000000"
+          type: string
+      type: object
+    AuthenticationError:
+      properties:
+        title:
+          example: Bad Request
+          type: string
+        status:
+          example: 400
+          type: integer
+        detail:
+          example: Something is wrong
+          type: string
+        details:
+          items:
+            example:
+              code: ERROR_CODE_123
+              path: nested.value
+              message: Invalid value
+            type: object
+          type: array
+      type: object
+    UsernamePasswordRequest:
+      description: Request for signing up or signing in a Username Password account.
+      example:
+        password: ThePassword123!
+        username: New_User_57
+      properties:
+        username:
+          description: "The username. Case insensitive. Length must be between 3-20\
+            \ with the allowed characters a-z, 0-9 and the symbols [.][-][@][_]."
+          example: New_User_57
+          type: string
+        password:
+          description: "The password. Length must be between 8-30 and contain at least\
+            \ one uppercase letter, at least one lowercase letter, at least one number\
+            \ and at least one symbol."
+          example: ThePassword123!
+          type: string
+      title: UsernamePasswordRequest
+      type: object
+    UsernamePasswordPasswordUpdateRequest:
+      description: Request for updating the password of a player using a Username
+        Password account.
+      example:
+        password: ThePassword123!
+        newPassword: TheNewPassword456@
+      properties:
+        password:
+          description: "The password. Length must be between 8-30 and contain at least\
+            \ one uppercase letter, at least one lowercase letter, at least one number\
+            \ and at least one symbol."
+          example: ThePassword123!
+          type: string
+        newPassword:
+          description: "The password to be changed. Length must be between 8-30 and\
+            \ contain at least one uppercase letter, at least one lowercase letter,\
+            \ at least one number and at least one symbol."
+          example: TheNewPassword456@
+          type: string
+      title: UsernamePasswordPasswordUpdateRequest
+      type: object
+  securitySchemes:
+    Client:
+      description: "To get started with Client Authentication, visit the [Client Authentication\
+        \ section](https://services.docs.unity.com/docs/client-auth)."
+      scheme: bearer
+      type: http
