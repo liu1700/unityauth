@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+	openapiclient "github.com/liu1700/unityauth"
 )
 
 func Test_unityauth_PlayerAuthenticationAPIService(t *testing.T) {
