@@ -1,7 +1,7 @@
 /*
-Player Authentication API
+Player Authentication Admin API
 
-# Introduction This is the API specification for the Unity Authentication service that allows player authentication.  ## Rate Limits The API has rate limiting in place. The endpoints are limited to 15 requests per second on a per-IP basis, and 300 requests over 30 minutes. The API responds with a `429` HTTP status code if the rate limit is exceeded. It will also respond with a `Retry-After` header to be used in conjunction with a client's retry logic. The value is the number of seconds until a request for the given player will be accepted. 
+# Introduction This is the Admin API specification for the Unity Authentication service that allows player authentication. To use this API, you must first enable it through the Unity Gaming Services dashboard.  For more information about how to set up Service Account Authentication, please read here: https://services.docs.unity.com/docs/service-account-auth  ## Rate Limits The API has rate limiting in place. Request are limited to 10 requests per second, and 500 requests per 30 minute period.  The API responds with a `429` HTTP status code if the rate limit is exceeded.  It will also respond with a `Retry-After` header to be used in conjunction with a client's retry logic. The value is the number of seconds until a request for the given player will be accepted. 
 
 API version: 1.0.1
 */
@@ -41,7 +41,7 @@ var (
 	queryDescape    = strings.NewReplacer( "%5B", "[", "%5D", "]" )
 )
 
-// APIClient manages communication with the Player Authentication API API v1.0.1
+// APIClient manages communication with the Player Authentication Admin API API v1.0.1
 // In most cases there should be only one, shared, APIClient.
 type APIClient struct {
 	cfg    *Configuration
@@ -49,7 +49,7 @@ type APIClient struct {
 
 	// API Services
 
-	PlayerAuthenticationAPI *PlayerAuthenticationAPIService
+	PlayerAuthenticationAdminAPI *PlayerAuthenticationAdminAPIService
 }
 
 type service struct {
@@ -68,7 +68,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.common.client = c
 
 	// API Services
-	c.PlayerAuthenticationAPI = (*PlayerAuthenticationAPIService)(&c.common)
+	c.PlayerAuthenticationAdminAPI = (*PlayerAuthenticationAdminAPIService)(&c.common)
 
 	return c
 }
@@ -410,9 +410,9 @@ func (c *APIClient) prepareRequest(
 
 		// Walk through any authentication.
 
-		// AccessToken Authentication
-		if auth, ok := ctx.Value(ContextAccessToken).(string); ok {
-			localVarRequest.Header.Add("Authorization", "Bearer "+auth)
+		// Basic HTTP Authentication
+		if auth, ok := ctx.Value(ContextBasicAuth).(BasicAuth); ok {
+			localVarRequest.SetBasicAuth(auth.UserName, auth.Password)
 		}
 
 	}

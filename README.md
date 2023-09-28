@@ -1,12 +1,19 @@
 # Go API client for unityauth
 
 # Introduction
-This is the API specification for the Unity Authentication service that allows player authentication.
+This is the Admin API specification for the Unity Authentication service that allows player authentication.
+To use this API, you must first enable it through the Unity Gaming Services dashboard.
+
+For more information about how to set up Service Account Authentication, please read here: https://services.docs.unity.com/docs/service-account-auth
 
 ## Rate Limits
-The API has rate limiting in place. The endpoints are limited to 15 requests per second on a per-IP basis, and 300 requests over 30 minutes.
-The API responds with a `429` HTTP status code if the rate limit is exceeded.
-It will also respond with a `Retry-After` header to be used in conjunction with a client's retry logic. The value is the number of seconds until a request for the given player will be accepted.
+The API has rate limiting in place. Request are limited to 10 requests per second, and 500 requests per 30 minute period.
+
+The API responds with a `429` HTTP status code if the rate limit is
+exceeded.
+
+It will also respond with a `Retry-After` header to be used in conjunction with a client's retry logic.
+The value is the number of seconds until a request for the given player will be accepted.
 
 
 ## Overview
@@ -80,69 +87,48 @@ ctx = context.WithValue(context.Background(), unityauth.ContextOperationServerVa
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *https://player-auth.services.api.unity.com*
+All URIs are relative to *https://services.api.unity.com*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*PlayerAuthenticationAPI* | [**CodeConfirmation**](docs/PlayerAuthenticationAPI.md#codeconfirmation) | **Post** /v1/authentication/code-link/confirm | Code Confirmation
-*PlayerAuthenticationAPI* | [**DeletePlayer**](docs/PlayerAuthenticationAPI.md#deleteplayer) | **Delete** /v1/users/{PlayerId} | Delete Player
-*PlayerAuthenticationAPI* | [**GenerateCode**](docs/PlayerAuthenticationAPI.md#generatecode) | **Post** /v1/authentication/code-link/generate | Generate Code
-*PlayerAuthenticationAPI* | [**GetCodeInfo**](docs/PlayerAuthenticationAPI.md#getcodeinfo) | **Post** /v1/authentication/code-link/info | Get Code Info
-*PlayerAuthenticationAPI* | [**GetJSONWebKeySet**](docs/PlayerAuthenticationAPI.md#getjsonwebkeyset) | **Get** /.well-known/jwks.json | Get JWKS
-*PlayerAuthenticationAPI* | [**GetPlayer**](docs/PlayerAuthenticationAPI.md#getplayer) | **Get** /v1/users/{PlayerId} | Get Player
-*PlayerAuthenticationAPI* | [**LinkExternalId**](docs/PlayerAuthenticationAPI.md#linkexternalid) | **Post** /v1/authentication/link/{idProvider} | Link External Id
-*PlayerAuthenticationAPI* | [**SignInWithCode**](docs/PlayerAuthenticationAPI.md#signinwithcode) | **Post** /v1/authentication/code-link/sign-in/{CodeLinkSessionId} | Sign In With Code
-*PlayerAuthenticationAPI* | [**SignInWithExternalToken**](docs/PlayerAuthenticationAPI.md#signinwithexternaltoken) | **Post** /v1/authentication/external-token/{idProvider} | External Token Sign In
-*PlayerAuthenticationAPI* | [**SignInWithSessionToken**](docs/PlayerAuthenticationAPI.md#signinwithsessiontoken) | **Post** /v1/authentication/session-token | Session Token Sign In
-*PlayerAuthenticationAPI* | [**SignInWithUsernamePassword**](docs/PlayerAuthenticationAPI.md#signinwithusernamepassword) | **Post** /v1/authentication/usernamepassword/sign-in | Username Password Sign In
-*PlayerAuthenticationAPI* | [**SignUpAnonymously**](docs/PlayerAuthenticationAPI.md#signupanonymously) | **Post** /v1/authentication/anonymous | Anonymous Sign Up
-*PlayerAuthenticationAPI* | [**SignUpWithUsernamePassword**](docs/PlayerAuthenticationAPI.md#signupwithusernamepassword) | **Post** /v1/authentication/usernamepassword/sign-up | Username Password Sign Up
-*PlayerAuthenticationAPI* | [**UnlinkExternalId**](docs/PlayerAuthenticationAPI.md#unlinkexternalid) | **Post** /v1/authentication/unlink/{idProvider} | Unlink External Id
-*PlayerAuthenticationAPI* | [**UsernamePasswordUpdatePassword**](docs/PlayerAuthenticationAPI.md#usernamepasswordupdatepassword) | **Post** /v1/authentication/usernamepassword/update-password | Username Password Update Password
+*PlayerAuthenticationAdminAPI* | [**DeletePlayer**](docs/PlayerAuthenticationAdminAPI.md#deleteplayer) | **Delete** /player-identity/v1/projects/{projectId}/users/{playerId} | Delete Player
+*PlayerAuthenticationAdminAPI* | [**DisablePlayer**](docs/PlayerAuthenticationAdminAPI.md#disableplayer) | **Post** /player-identity/v1/projects/{projectId}/users/{playerId}/disable | Disable Player
+*PlayerAuthenticationAdminAPI* | [**EnablePlayer**](docs/PlayerAuthenticationAdminAPI.md#enableplayer) | **Post** /player-identity/v1/projects/{projectId}/users/{playerId}/enable | Enable Player
+*PlayerAuthenticationAdminAPI* | [**GetPlayer**](docs/PlayerAuthenticationAdminAPI.md#getplayer) | **Get** /player-identity/v1/projects/{projectId}/users/{playerId} | Get Player
+*PlayerAuthenticationAdminAPI* | [**ListPlayers**](docs/PlayerAuthenticationAdminAPI.md#listplayers) | **Get** /player-identity/v1/projects/{projectId}/users | List Players
 
 
 ## Documentation For Models
 
- - [AppleGameCenterConfig](docs/AppleGameCenterConfig.md)
- - [AuthenticationError](docs/AuthenticationError.md)
- - [AuthenticationResponse](docs/AuthenticationResponse.md)
- - [CodeLinkConfirmationRequest](docs/CodeLinkConfirmationRequest.md)
- - [CodeLinkInfoRequest](docs/CodeLinkInfoRequest.md)
- - [CodeLinkInfoResponse](docs/CodeLinkInfoResponse.md)
- - [ExternalId](docs/ExternalId.md)
- - [GenerateCodeRequest](docs/GenerateCodeRequest.md)
- - [GenerateCodeResponse](docs/GenerateCodeResponse.md)
- - [JSONWebKey](docs/JSONWebKey.md)
- - [JSONWebKeySet](docs/JSONWebKeySet.md)
- - [LinkExternalIdRequest](docs/LinkExternalIdRequest.md)
- - [LinkExternalIdResponse](docs/LinkExternalIdResponse.md)
- - [OculusConfig](docs/OculusConfig.md)
- - [Player](docs/Player.md)
- - [PlayerResponse](docs/PlayerResponse.md)
- - [SignInWithCodeRequest](docs/SignInWithCodeRequest.md)
- - [SignInWithExternalTokenRequest](docs/SignInWithExternalTokenRequest.md)
- - [SignInWithSessionTokenRequest](docs/SignInWithSessionTokenRequest.md)
- - [SignUpAnonymouslyRequest](docs/SignUpAnonymouslyRequest.md)
- - [SteamConfig](docs/SteamConfig.md)
- - [UnlinkExternalIdRequest](docs/UnlinkExternalIdRequest.md)
- - [UnlinkExternalIdResponse](docs/UnlinkExternalIdResponse.md)
- - [UsernamePasswordPasswordUpdateRequest](docs/UsernamePasswordPasswordUpdateRequest.md)
- - [UsernamePasswordRequest](docs/UsernamePasswordRequest.md)
- - [UsernamePasswordResponse](docs/UsernamePasswordResponse.md)
+ - [PlayerAuthAuthenticationErrorV1](docs/PlayerAuthAuthenticationErrorV1.md)
+ - [PlayerAuthAuthorizationErrorV1](docs/PlayerAuthAuthorizationErrorV1.md)
+ - [PlayerAuthExternalId](docs/PlayerAuthExternalId.md)
+ - [PlayerAuthInternalServerErrorV1](docs/PlayerAuthInternalServerErrorV1.md)
+ - [PlayerAuthListProjectUserResponse](docs/PlayerAuthListProjectUserResponse.md)
+ - [PlayerAuthListProjectUserResponseExternalId](docs/PlayerAuthListProjectUserResponseExternalId.md)
+ - [PlayerAuthListProjectUserResponseUser](docs/PlayerAuthListProjectUserResponseUser.md)
+ - [PlayerAuthNotFoundErrorV1](docs/PlayerAuthNotFoundErrorV1.md)
+ - [PlayerAuthPlayerProjectResponse](docs/PlayerAuthPlayerProjectResponse.md)
+ - [PlayerAuthServiceUnavailableErrorV1](docs/PlayerAuthServiceUnavailableErrorV1.md)
+ - [PlayerAuthTooManyRequestsErrorV1](docs/PlayerAuthTooManyRequestsErrorV1.md)
+ - [PlayerAuthValidationErrorV1](docs/PlayerAuthValidationErrorV1.md)
 
 
 ## Documentation For Authorization
 
 
 Authentication schemes defined for the API:
-### Client
+### Admin
 
-- **Type**: HTTP Bearer token authentication
+- **Type**: HTTP basic authentication
 
 Example
 
 ```golang
-auth := context.WithValue(context.Background(), sw.ContextAccessToken, "BEARER_TOKEN_STRING")
+auth := context.WithValue(context.Background(), sw.ContextBasicAuth, sw.BasicAuth{
+    UserName: "username",
+    Password: "password",
+})
 r, err := client.Service.Operation(auth, args)
 ```
 

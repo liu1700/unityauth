@@ -1,7 +1,7 @@
 /*
-Player Authentication API
+Player Authentication Admin API
 
-# Introduction This is the API specification for the Unity Authentication service that allows player authentication.  ## Rate Limits The API has rate limiting in place. The endpoints are limited to 15 requests per second on a per-IP basis, and 300 requests over 30 minutes. The API responds with a `429` HTTP status code if the rate limit is exceeded. It will also respond with a `Retry-After` header to be used in conjunction with a client's retry logic. The value is the number of seconds until a request for the given player will be accepted. 
+# Introduction This is the Admin API specification for the Unity Authentication service that allows player authentication. To use this API, you must first enable it through the Unity Gaming Services dashboard.  For more information about how to set up Service Account Authentication, please read here: https://services.docs.unity.com/docs/service-account-auth  ## Rate Limits The API has rate limiting in place. Request are limited to 10 requests per second, and 500 requests per 30 minute period.  The API responds with a `429` HTTP status code if the rate limit is exceeded.  It will also respond with a `Retry-After` header to be used in conjunction with a client's retry logic. The value is the number of seconds until a request for the given player will be accepted. 
 
 API version: 1.0.1
 */
